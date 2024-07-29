@@ -1,8 +1,8 @@
 <script>
-    import YouTubeInput from '../lib/components/YouTubeInput.svelte';
-    import ConversionStatus from '../lib/components/ConversionStatus.svelte';
-    import MarkdownOutput from '../lib/components/MarkdownOutput.svelte';
-    import { convertYouTubeToMarkdown } from '../lib/utils/api';
+    import YouTubeInput from '$lib/components/YoutubeInput.svelte';
+    import ConversionStatus from '$lib/components/ConversionStatus.svelte';
+    import MarkdownOutput from '$lib/components/MarkdownOutput.svelte';
+    import { convertYouTubeToMarkdown } from '$lib/utils/api';
   
     let youtubeUrl = '';
     let conversionStatus = 'idle';
