@@ -22,6 +22,6 @@ export type ConversionStatus =
     | "completed"
     | "error";
 
-export interface YouTubeRequest {
-  youtube_url: string;
+export interface VideoRequest {
+  video: File;
 }
