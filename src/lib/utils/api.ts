@@ -6,7 +6,7 @@ import type {
 } from "$lib/types";
 
 const API_BASE_URL =
-  "https://yirenlu92--video-to-blog-post-fastapi-app.modal.run";
+  "https://video-to-blog-post--video-to-blog-post-fastapi-app.modal.run/";
 
 async function startConversion(
   youtubeUrl: string

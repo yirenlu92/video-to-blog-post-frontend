@@ -2,7 +2,6 @@
 <header class="bg-white shadow-md">
     <div class="container mx-auto px-4 py-6 flex justify-between items-center">
       <div class="flex items-center">
-        <img src="/logo.svg" alt="Modal Labs Logo" class="h-8 w-auto mr-4">
         <h1 class="text-xl font-semibold text-gray-800">YouTube to Markdown</h1>
       </div>
       <nav>
