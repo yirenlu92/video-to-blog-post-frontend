@@ -3,11 +3,14 @@
     import ConversionStatus from '$lib/components/ConversionStatus.svelte';
     import MarkdownOutput from '$lib/components/MarkdownOutput.svelte';
     import { convertVideoToMarkdown } from '$lib/utils/api';
+    import type { ConversionStatus as ConversionStatusType } from '$lib/types';
+
   
     let videoFile: File | null = null;
-    let conversionStatus: 'idle' | 'processing' | 'completed' | 'error' = 'idle';
+    let conversionStatus: ConversionStatusType = 'idle';
     let markdownContent = '';
     let uneditedTranscript = '';
+    let errorMessage = '';
   
     async function handleVideoUpload(event: CustomEvent<File>) {
       videoFile = event.detail;
@@ -18,12 +21,14 @@
       if (!videoFile) return;
       
       conversionStatus = 'processing';
+      errorMessage = '';
       try {
         markdownContent = await convertVideoToMarkdown(videoFile);
         conversionStatus = 'completed';
       } catch (error) {
         console.error('Error:', error);
         conversionStatus = 'error';
+        errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       }
     }
   </script>
@@ -39,7 +44,7 @@
       Selected video: {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)
     </p>
   {/if}
-  <ConversionStatus {conversionStatus} />
-  <!-- {#if conversionStatus === 'completed'} -->
+  <ConversionStatus {conversionStatus} {errorMessage} />
+  {#if conversionStatus === 'completed'}
     <MarkdownOutput {markdownContent} />
-  <!-- {/if} -->
+  {/if}

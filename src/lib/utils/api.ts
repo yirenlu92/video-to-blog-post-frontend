@@ -8,6 +8,26 @@ import type {
 const API_BASE_URL =
   "https://video-to-blog-post--video-to-blog-post-fastapi-app.modal.run";
 
+const API_BASE_URL_DEV =
+  "https://video-to-blog-post-dev--video-to-blog-post-fastapi-app.modal.run";
+
+const isDevelopment =
+  process.env
+    .NODE_ENV ===
+  "development";
+
+console.log(
+  "Is development"
+);
+console.log(
+  isDevelopment
+);
+
+const apiBaseUrl =
+  isDevelopment
+    ? API_BASE_URL_DEV
+    : API_BASE_URL;
+
 async function startConversion(
   videoFile: File
 ): Promise<string> {
@@ -20,13 +40,20 @@ async function startConversion(
 
   const response =
     await fetch(
-      `${API_BASE_URL}/accept`,
+      `${apiBaseUrl}/accept`,
       {
         method:
           "POST",
         body: formData,
       }
     );
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      `HTTP error! status: ${response.status}`
+    );
+  }
   const data: AcceptResponse =
     await response.json();
   return data.call_id;
@@ -37,7 +64,7 @@ async function pollResult(
 ): Promise<PollResponse> {
   const response =
     await fetch(
-      `${API_BASE_URL}/result/${callId}`
+      `${apiBaseUrl}/result/${callId}`
     );
   if (
     response.status ===
@@ -47,6 +74,16 @@ async function pollResult(
       status:
         "processing",
     };
+  }
+  if (
+    response.status ===
+    500
+  ) {
+    const errorData =
+      await response.json();
+    throw new Error(
+      `A 500 error occurred during conversion: ${errorData.message}`
+    );
   }
   const data: ConversionResult =
     await response.json();
@@ -60,37 +97,52 @@ async function pollResult(
 export async function convertVideoToMarkdown(
   videoFile: File
 ): Promise<string> {
-  const callId =
-    await startConversion(
-      videoFile
-    );
+  try {
+    const callId =
+      await startConversion(
+        videoFile
+      );
 
-  while (true) {
-    const pollResponse =
-      await pollResult(
-        callId
-      );
-    if (
-      pollResponse.status ===
-        "completed" &&
-      pollResponse.result
-    ) {
-      console.log(
-        pollResponse
+    while (true) {
+      const pollResponse =
+        await pollResult(
+          callId
+        );
+      if (
+        pollResponse.status ===
+          "completed" &&
+        pollResponse.result
+      ) {
+        console.log(
+          pollResponse
+            .result
+            .markdown
+        );
+        return pollResponse
           .result
-          .markdown
+          .markdown;
+      }
+      // Wait for 5 seconds before polling again
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            5000
+          )
       );
-      return pollResponse
-        .result
-        .markdown;
     }
-    // Wait for 5 seconds before polling again
-    await new Promise(
-      (resolve) =>
-        setTimeout(
-          resolve,
-          5000
-        )
-    );
+  } catch (error) {
+    if (
+      error instanceof
+      Error
+    ) {
+      throw new Error(
+        `Conversion failed: ${error.message}`
+      );
+    } else {
+      throw new Error(
+        "An unknown error occurred during conversion"
+      );
+    }
   }
 }
