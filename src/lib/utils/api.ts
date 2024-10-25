@@ -38,6 +38,10 @@ async function startConversion(
     videoFile
   );
 
+  console.log(
+    apiBaseUrl
+  );
+
   const response =
     await fetch(
       `${apiBaseUrl}/accept`,
